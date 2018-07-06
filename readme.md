@@ -1,18 +1,16 @@
 # kokudoDEM2bin
 
-## 概要
+##  [日本語/Japanese]
 
- [日本語/Japanese]
+### 1. 概要
 
 国土地理院配布の基盤地図情報（数値標高モデル）をバイナリデータに変換するためのコードです。
 
-
-
-## 使用方法
+###2. 使用方法
 
 OSはUbuntu/Linuxを想定。
 
-### 事前準備
+#### 2.1. 事前準備
 
 1. python3のインストール
 2. 必要ライブラリをインストール
@@ -32,7 +30,7 @@ sudo apt-get -y install python-gdal
 
 
 
-### 実行方法
+#### 2.2. 実行方法
 
 ``` bash
 python3 kokudoDEM2bin.py <-l lonmin latmin lonmax latmax> [-nd] [-nc] [-ncon] [-nf] [-ms MAXSIZE] [-h]
@@ -52,7 +50,7 @@ python3 kokudoDEM2bin.py <-l lonmin latmin lonmax latmax> [-nd] [-nc] [-ncon] [-
 
 
 
-#### 実行例
+#### 2.3. 実行例
 
 ```bash
 python3 kokudoDEM2bin.py -l 36.554892 137.638887 36.589236 137.698095 -ms 100 --vmin 1000
@@ -62,11 +60,13 @@ python3 kokudoDEM2bin.py -l 36.554892 137.638887 36.589236 137.698095 -ms 100 --
 
 
 
-[英語/English]
+## [英語/English]
 
 Codes for converting DEM data (Kiban Chizu Jyouhou Digital Elevation Map) of Japan into binary file.
 
 
+
+### Usage
 
 ```bash
 usage: kokudoDEM2bin.py [-h] -l LLUR LLUR LLUR LLUR [-nd] [-nc] [-ncon] [-nf]
