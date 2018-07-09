@@ -1,0 +1,6 @@
+bin/*
+connected_bin/*
+fig/*
+json/*
+
+!.gitkeep
