@@ -152,7 +152,7 @@ def json2raster(arg):
         print("converted binary file for {} {} arleady exists".format(x, y))
 
 
-def make_fig(ll_x, ur_x, ll_y, ur_y, maxsize, vmin, vmax):
+def make_fig(ll_x, ur_x, ll_y, ur_y, maxsize, vmin, vmax, showfig):
     for box_x in range(ll_x, ur_x + 1, maxsize):
         for box_y in range(ur_y, ll_y + 1, maxsize):
 
@@ -169,5 +169,8 @@ def make_fig(ll_x, ur_x, ll_y, ur_y, maxsize, vmin, vmax):
                 plt.imshow(bindata, vmin=vmin, vmax=vmax)
                 plt.colorbar()
                 figname = "fig/{}_{}.png".format(box_x, box_y)
-                # plt.show()
-                plt.savefig(figname)
+
+                if showfig:
+                    plt.show()
+                else:
+                    plt.savefig(figname)
