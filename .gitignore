@@ -1,5 +1,6 @@
 bin/*
 connected_bin/*
+connected_json/*
 fig/*
 json/*
 

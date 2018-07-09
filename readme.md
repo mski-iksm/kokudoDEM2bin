@@ -53,6 +53,7 @@ python3 kokudoDEM2bin.py <-l lonmin latmin lonmax latmax> [-nd] [-nc] [-ncon] [-
   * `-nc, --noconvert`：jsonファイルをバイナリデータに変換する作業をスキップする場合に使用。`bin`フォルダに必要なバイナリデータがある場合のみ使用可能。
   * `-ncon, --noconnect`：1タイルごとのバイナリデータを大きなサイズに結合する作業をスキップする場合に使用。`connected_bin`に必要な結合済みバイナリデータがある場合のみ使用可能。
   * `-nf, --nofig`：画像を出力しない場合にのみ使用可能。
+  * `-sf, --showfig`：画像を表示させる場合に使用。使用した場合、画像ファイルは保存されない。
   * `-ms MAXSIZE, --maxsize MAXSIZE`：１つの画像として結合するタイルの数（１辺のタイル数）を`int`で指定する。指定しない場合は`10`（10x10=100タイルを結合する）。なお、元データの１タイルは一辺150m程度。
   * `-min VMIN, --vmin VMIN`：DEMを図化する際の最小値。デフォルトは`None`なのでデータ中の最小値を図の最小値とする。
   * `-max VMAX, --vmax VMAX`：DEMを図化する際の最大値。デフォルトは`None`なのでデータ中の最大値を図の最大値とする。
@@ -78,7 +79,8 @@ __[メイン出力]__
   * float32形式
   * リトルエンディアン
   * C言語オーダーのバイナリ配列（[m,n]はm行n列）
-  * １ファイルの大きさは`-ms MAXSIZE, --maxsize MAXSIZE`で設定した大きさ通り（`-ms 5`ならば、元データにおいて5x5タイルを１枚のバイナリデータとして書き出す。）
+  * １ファイルに出力される範囲は`-ms MAXSIZE, --maxsize MAXSIZE`で設定した大きさ通り（`-ms 10`ならば、元データにおいて10x10タイルを１枚のバイナリデータとして書き出す。）
+  * １タイルの解像度は`30 pixels x 30 pixels`。`-ms 10`ならば、300 x 300 ピクセルのバイナリデータとして出力される。
   * ファイル名： `{x}_{y}.bin`
     * `x`：データの左上角のタイル番号(x座標)を示す。
     * `y`：データの左上角のタイル番号(y座標)を示す。
@@ -125,6 +127,7 @@ optional arguments:
   -nc, --noconvert      Set for skip converting each json file to binary.
   -ncon, --noconnect    Set for skip connecting binary files.
   -nf, --nofig          Set for skip illustrating figure.
+  -sf, --showfig        Set for show figure instead of saveing as png file.
   -ms MAXSIZE, --maxsize MAXSIZE
                         Max size of connected binary data in number of tiles.
                         The binary data will be separated into multiple files

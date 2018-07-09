@@ -22,6 +22,9 @@ parser.add_argument("-ncon", "--noconnect",
 parser.add_argument("-nf", "--nofig",
                     help='Set for skip illustrating figure.',
                     action='store_true')
+parser.add_argument("-sf", "--showfig",
+                    help='Set for show figure instead of saveing as png file.',
+                    action='store_true')
 parser.add_argument("-ms", "--maxsize",
                     help='Max size of connected binary data in number of tiles. The binary data \
                     will be separated into multiple files when selected area exceeds this size.\
@@ -59,4 +62,5 @@ if args.noconnect is False:
 
 # output fig
 if args.nofig is False:
-    kl.make_fig(ll_x, ur_x, ll_y, ur_y, args.maxsize, args.vmin, args.vmax)
+    kl.make_fig(ll_x, ur_x, ll_y, ur_y, args.maxsize,
+                args.vmin, args.vmax, args.showfig)
