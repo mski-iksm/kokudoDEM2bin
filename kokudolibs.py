@@ -127,26 +127,50 @@ def json2raster(arg):
     fname10b = "bin/{}_{}_{}.bin".format(x, y, "10b")
 
     if (os.path.exists(fname5a) is False) and (os.path.exists(fname10b) is False):
-        for filetype in ["5a", "10b"]:
-            jsonname = "json/{}_{}_{}.geojson".format(x, y, filetype)
-            binname = "bin/{}_{}_{}.bin".format(x, y, filetype)
-            if os.path.exists(jsonname):
-                print("conveting {}".format(jsonname))
-                lon_min = x2lon(x)
-                lon_max = x2lon(x + 1)
-                lat_min = y2lat(y + 1)
-                lat_max = y2lat(y)
+        # read 3x3 around target tile and make connected geojson
+        jsonname = "connected_json/{}_{}.geojson".format(x, y)
+        if os.path.exists(jsonname):
+            os.remove(jsonname)
 
-                xsize = 30
-                ysize = 30
+        target_filetype = "10b"
+        for x_3 in [x - 1, x, x + 1]:
+            for y_3 in [y - 1, y, y + 1]:
+                for filetype in ["5a", "10b"]:
+                    orgjson = "json/{}_{}_{}.geojson".format(
+                        x_3, y_3, filetype)
+                    if os.path.exists(orgjson):
+                        if x_3 == x and y_3 == y:
+                            target_filetype = filetype
+                            target_json = orgjson
+                        if os.path.exists(jsonname):
+                            script = "ogr2ogr -append -f GeoJSON {} {}".format(
+                                jsonname, orgjson)
+                        else:
+                            script = "ogr2ogr -f GeoJSON {} {}".format(
+                                jsonname, orgjson)
 
-                script = "gdal_grid -ot Float32 -of ENVI -zfield alti -a nearest -txe {} {} -tye {} {} -outsize {} {} {} {}".format(
-                    lon_min, lon_max, lat_min, lat_max, xsize, ysize, jsonname, binname)
-                print(script)
-                os.system(script)
-                break
-            else:
-                print("{} not found".format(jsonname))
+                        os.system(script)
+                        break
+                    else:
+                        pass
+
+        # readconnected json
+        if os.path.exists(jsonname) and os.path.exists(target_json):
+            binname = "bin/{}_{}_{}.bin".format(x, y, target_filetype)
+            print("conveting {}".format(jsonname))
+            lon_min = x2lon(x)
+            lon_max = x2lon(x + 1)
+            lat_min = y2lat(y + 1)
+            lat_max = y2lat(y)
+
+            xsize = 30
+            ysize = 30
+
+            script = "gdal_grid -ot Float32 -of ENVI -zfield alti -a nearest -txe {} {} -tye {} {} -outsize {} {} {} {}".format(
+                lon_min, lon_max, lat_min, lat_max, xsize, ysize, jsonname, binname)
+            os.system(script)
+        else:
+            print("no binary file creared for x:{} y:{}", format(x, y))
 
     else:
         print("converted binary file for {} {} arleady exists".format(x, y))
