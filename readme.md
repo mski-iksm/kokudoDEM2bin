@@ -1,4 +1,4 @@
-﻿# kokudoDEM2bin
+# kokudoDEM2bin
 
 ##  [日本語/Japanese]
 
@@ -26,7 +26,7 @@ OSはUbuntu/Linuxを想定。
 2. 必要ライブラリをインストール
 
 ```bash
-sudo pip install numpy matplotlib
+pip install numpy matplotlib
 ```
 
 3. gdalのインストール
@@ -39,11 +39,10 @@ sudo apt-get -y install python-gdal
 ```
 
 
-
 #### 2.2. 実行方法
 
 ``` bash
-python3 kokudoDEM2bin.py [-l lonmin latmin lonmax latmax] [-nd] [-nc] [-ncon] [-nf] [-ms MAXSIZE] [-h] [-min] [-max]
+python kokudoDEM2bin.py [-l lonmin latmin lonmax latmax] [-nd] [-nc] [-ncon] [-nf] [-ms MAXSIZE] [-h] [-min] [-max]
 ```
 
 * 必須引数

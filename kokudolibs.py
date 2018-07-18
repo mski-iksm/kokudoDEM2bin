@@ -12,10 +12,11 @@ import matplotlib.pyplot as plt
 import _tkinter
 import itertools
 from multiprocessing import Pool, Process, cpu_count
+import json
 
 
 def get_tile(lon_min, lon_max, lat_min, lat_max):
-    # input lats/lons should be 0.01 * n
+    # input lats/lons should be 0.01
     ll_x = int(lon2x(lon_min))  # small x
     ur_x = int(lon2x(lon_max))  # large x
     ll_y = int(lat2y(lat_min))  # large y
@@ -36,14 +37,14 @@ def x2lon(x):
 
 
 def lat2y(lat):
-    L = math.atanh(math.sin(math.radians(85.0511)))
-    y = (1 - (math.atanh(math.sin(math.radians(lat))) / L)) * (2**17)
+    l = math.atanh(math.sin(math.radians(85.0511)))
+    y = (1 - (math.atanh(math.sin(math.radians(lat))) / l)) * (2**17)
     return y
 
 
 def y2lat(y):
-    L = math.atanh(math.sin(math.radians(85.0511)))
-    phi = math.asin(math.tanh((1 - y * 2**(-17)) * L))
+    l = math.atanh(math.sin(math.radians(85.0511)))
+    phi = math.asin(math.tanh((1 - y * 2**(-17)) * l))
     return math.degrees(phi)
 
 
@@ -51,29 +52,23 @@ def download_json(ll_x, ll_y, ur_x, ur_y):
     # download 1 tile outside target area
     xylist = list(itertools.product(
         range(ll_x - 1, ur_x + 2), range(ur_y - 1, ll_y + 2)))
-    n = cpu_count()
-    p = Pool(n * 2)
-    p.map(downoad_iter, xylist)
-    p.close()
-    p.terminate()
+    list(map(downoad_iter, xylist))
 
 
 def downoad_iter(arg):
     x = arg[0]
     y = arg[1]
 
-    fname5a = "json/{}_{}_{}.geojson".format(x, y, "5a")
-    fname10b = "json/{}_{}_{}.geojson".format(x, y, "10b")
+    savename = "json/{}_{}.geojson".format(x, y)
 
-    if (os.path.exists(fname5a) is False) and (os.path.exists(fname10b) is False):
+    if os.path.exists(savename) is False:
         for filetype in ["5a", "10b"]:
             filename = "https://cyberjapandata.gsi.go.jp/xyz/experimental_dem{}/18/{}/{}.geojson".format(
                 filetype, x, y)
-            savename = "json/{}_{}_{}.geojson".format(x, y, filetype)
 
             try:
-                print("{} file found at {}".format(filetype, filename))
                 urllib.request.urlretrieve(filename, savename)
+                print("{} file found at {}".format(filetype, filename))
                 break
             except urllib.error.HTTPError as e:
                 print("no {} file found at {}".format(filetype, filename))
@@ -82,128 +77,54 @@ def downoad_iter(arg):
         print("json file for {} {} arleady exists".format(x, y))
 
 
-def connectjsons():
+def connect_jsons(ll_x, ll_y, ur_x, ur_y, lat_min, lon_min):
     # connect target json files
-    # use python instead of gdal
+    # use python native json instead of gdal commands
+    connected_json_features = []
+    for x in range(ll_x - 1, ur_x + 2):
+        for y in range(ur_y - 1, ll_y + 2):
+            jsonfilename = "json/{}_{}.geojson".format(x, y)
+            print("connecting {}".format(jsonfilename))
+            file = open(jsonfilename, "r")
+            jsondata = json.loads(file.read())["features"]
+            connected_json_features = connected_json_features + jsondata
+            file.close()
 
-    #
-
-
-def connectbins(ll_x, ll_y, ur_x, ur_y, maxsize):
-    for box_x in range(ll_x, ur_x + 1, maxsize):
-        for box_y in range(ur_y, ll_y + 1, maxsize):
-            outname = "connected_bin/{}_{}.bin".format(box_x, box_y)
-            if os.path.exists(outname):
-                os.remove(outname)
-
-            box_x_max = min(box_x + maxsize, ur_x + 1)
-            box_y_max = min(box_y + maxsize, ll_y + 1)
-            outdata = np.ones((box_x_max - box_x) * (box_y_max - box_y) * 30 * 30
-                              ).reshape(((box_y_max - box_y) * 30, (box_x_max - box_x) * 30)) * (-1e20)
-            for ix, x in enumerate(range(box_x, box_x_max)):
-                for iy, y in enumerate(range(box_y, box_y_max)):
-                    for filetype in ["5a", "10b"]:
-                        binname = "bin/{}_{}_{}.bin".format(x, y, filetype)
-                        if os.path.exists(binname):
-                            print("connecting {}".format(binname))
-                            bindata = np.fromfile(
-                                binname, dtype="float32").reshape((30, 30))
-                            outdata[iy * 30:iy * 30 + 30,
-                                    ix * 30:ix * 30 + 30] = bindata[::-1, :]
-                            break
-                        else:
-                            print("{} not found".format(binname))
-
-            outdata = outdata.astype("float32")
-            outdata.tofile(outname)
+    new_json_dic = {'type': 'FeatureCollection',
+                    'features': connected_json_features}
+    str_lat_min = str(lat_min).replace('.', '_')
+    str_lon_min = str(lon_min).replace('.', '_')
+    new_json_name = "connected_json/{}_{}.geojson".format(lat_min, lon_min)
+    new_json_file = open(new_json_name, "w")
+    json.dump(new_json_dic, new_json_file, indent=4)
+    new_json_file.close()
 
 
-def convertjson(ll_x, ll_y, ur_x, ur_y):
-    xylist = list(itertools.product(
-        range(ll_x, ur_x + 1), range(ur_y, ll_y + 1)))
-    n = cpu_count()
-    p = Pool(n)
-    p.map(json2raster, xylist)
-    p.close()
-    p.terminate()
+def convert_json(lat_min, lon_min, lat_max, lon_max):
+    # connected_json -> bin
+    xsize = 2160
+    ysize = 2160
+    jsonname = "connected_json/{}_{}.geojson".format(lat_min, lon_min)
+    binname = "bin/{}_{}.bin".format(lat_min, lon_min)
+    script = "gdal_grid -ot Float32 -of ENVI -l OGRGeoJSON -zfield alti -a nearest -txe {} {} -tye {} {} -outsize {} {} {} {}".format(
+        lon_min, lon_max, lat_min, lat_max, xsize, ysize, jsonname, binname)
+    print(script)
+    os.system(script)
 
 
-def json2raster(arg):
-    x = arg[0]
-    y = arg[1]
+def make_fig(lat_min, lon_min, showfig, vmin, vmax):
+    binname = "bin/{}_{}.bin".format(lat_min, lon_min)
+    if os.path.exists(binname):
+        print("illustraing {}".format(binname))
+        bindata = np.fromfile(
+            binname, dtype="float32").reshape([2160, 2160])
 
-    fname5a = "bin/{}_{}_{}.bin".format(x, y, "5a")
-    fname10b = "bin/{}_{}_{}.bin".format(x, y, "10b")
+        plt.close()
+        plt.imshow(bindata, vmin=vmin, vmax=vmax)
+        plt.colorbar()
+        figname = "fig/{}_{}.png".format(lat_min, lon_min)
 
-    if (os.path.exists(fname5a) is False) and (os.path.exists(fname10b) is False):
-        # read 3x3 around target tile and make connected geojson
-        jsonname = "connected_json/{}_{}.geojson".format(x, y)
-        if os.path.exists(jsonname):
-            os.remove(jsonname)
-
-        target_filetype = "10b"
-        for x_3 in [x - 1, x, x + 1]:
-            for y_3 in [y - 1, y, y + 1]:
-                for filetype in ["5a", "10b"]:
-                    orgjson = "json/{}_{}_{}.geojson".format(
-                        x_3, y_3, filetype)
-                    if os.path.exists(orgjson):
-                        if x_3 == x and y_3 == y:
-                            target_filetype = filetype
-                            target_json = orgjson
-                        if os.path.exists(jsonname):
-                            script = "ogr2ogr -append -f GeoJSON {} {}".format(
-                                jsonname, orgjson)
-                        else:
-                            script = "ogr2ogr -f GeoJSON {} {}".format(
-                                jsonname, orgjson)
-
-                        os.system(script)
-                        break
-                    else:
-                        pass
-
-        # readconnected json
-        if os.path.exists(jsonname) and os.path.exists(target_json):
-            binname = "bin/{}_{}_{}.bin".format(x, y, target_filetype)
-            print("conveting {}".format(jsonname))
-            lon_min = x2lon(x)
-            lon_max = x2lon(x + 1)
-            lat_min = y2lat(y + 1)
-            lat_max = y2lat(y)
-
-            xsize = int((lon_max - lon_min) * 3600 * 6)
-            ysize = int((lat_max - lat_min) * 3600 * 6)
-
-            script = "gdal_grid -ot Float32 -of ENVI -zfield alti -a nearest -txe {} {} -tye {} {} -outsize {} {} {} {}".format(
-                lon_min, lon_max, lat_min, lat_max, xsize, ysize, jsonname, binname)
-            os.system(script)
+        if showfig:
+            plt.show()
         else:
-            print("no binary file creared for x:{} y:{}", format(x, y))
-
-    else:
-        print("converted binary file for {} {} arleady exists".format(x, y))
-
-
-def make_fig(ll_x, ur_x, ll_y, ur_y, maxsize, vmin, vmax, showfig):
-    for box_x in range(ll_x, ur_x + 1, maxsize):
-        for box_y in range(ur_y, ll_y + 1, maxsize):
-
-            box_x_max = min(box_x + maxsize, ur_x + 1)
-            box_y_max = min(box_y + maxsize, ll_y + 1)
-            binname = "connected_bin/{}_{}.bin".format(box_x, box_y)
-            if os.path.exists(binname):
-                print("illustraing {}".format(binname))
-                bindata = np.fromfile(
-                    binname, dtype="float32").reshape(
-                    [(box_y_max - box_y) * 30, (box_x_max - box_x) * 30])
-
-                plt.close()
-                plt.imshow(bindata, vmin=vmin, vmax=vmax)
-                plt.colorbar()
-                figname = "fig/{}_{}.png".format(box_x, box_y)
-
-                if showfig:
-                    plt.show()
-                else:
-                    plt.savefig(figname)
+            plt.savefig(figname)

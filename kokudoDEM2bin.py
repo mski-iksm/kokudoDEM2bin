@@ -8,7 +8,7 @@ parser = argparse.ArgumentParser(
     description='Download and convert Japanese DEM to binary files.')
 parser.add_argument("-l", "--llur",
                     help='Input the Lower Left corner and Upper Right corner cordinate.\
-                     Order must be [LL(lat) LL(lon) UR(lat) UR(lon)]',
+                     Order must be [LL(lon) UR(lon) LL(lat) UR(lat)]',
                     nargs=4, type=float, required=True)
 parser.add_argument("-nd", "--nodownload",
                     help='Set for skip downloading.',
@@ -41,10 +41,10 @@ parser.add_argument("-max", "--vmax",
 
 args = parser.parse_args()
 
-lon_min = args.llur[1]
-lon_max = args.llur[3]
-lat_min = args.llur[0]
-lat_max = args.llur[2]
+lon_min = args.llur[0]
+lon_max = args.llur[1]
+lat_min = args.llur[2]
+lat_max = args.llur[3]
 
 # get coordinate tile number
 ll_x, ll_y, ur_x, ur_y = kl.get_tile(lon_min, lon_max, lat_min, lat_max)
@@ -54,22 +54,15 @@ if args.nodownload is False:
     kl.download_json(ll_x, ll_y, ur_x, ur_y)
 
 # connect json files
+kl.connect_jsons(ll_x, ll_y, ur_x, ur_y, lat_min, lon_min)
 
 
 # interpolate and convert connected json file into binary
 # reslution is 1/6 arc second
 # tile size is 216x216 px
+kl.convert_json(lat_min, lon_min, lat_max, lon_max)
 
-################################
-# interpolate and convert each json file into binary file
-if args.noconvert is False:
-    kl.convertjson(ll_x, ll_y, ur_x, ur_y)
-
-# connect binary files
-if args.noconnect is False:
-    kl.connectbins(ll_x, ll_y, ur_x, ur_y, args.maxsize)
 
 # output fig
 if args.nofig is False:
-    kl.make_fig(ll_x, ur_x, ll_y, ur_y, args.maxsize,
-                args.vmin, args.vmax, args.showfig)
+    kl.make_fig(lat_min, lon_min, args.showfig, args.vmin, args.vmax)
