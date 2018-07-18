@@ -4,13 +4,13 @@
 
 ### 1. 概要
 
-国土地理院配布の[基盤地図情報（数値標高モデル・DEM）](https://fgd.gsi.go.jp/download/ref_dem.html)をバイナリデータに変換するためのコードです。
+国土地理院配布の[基盤地図情報（数値標高モデル・DEM）](https://fgd.gsi.go.jp/download/ref_dem.html)をバイナリデータに変換するためのコード。
 
-自動で標高データのダウンロードからバイナリファイルや画像ファイルにしてくれます。
+自動で標高データのダウンロードからバイナリファイルや画像ファイルを生成。
 
-データのソースは国土地理院の基盤地図情報（数値標高モデル）の5m/10m解像度のものです。
+標高データのソースは国土地理院の基盤地図情報（数値標高モデル）の5m/10m解像度のもの。
 
-出力は5m解像度の標高データです。
+出力は、1/6秒角 (1/6 arc second degree) 解像度の標高データ（おおよそ5m解像度）。
 
 
 
@@ -26,7 +26,7 @@ OSはUbuntu/Linuxを想定。
 2. 必要ライブラリをインストール
 
 ```bash
-sudo pip3 install numpy matplotlib
+sudo pip install numpy matplotlib
 ```
 
 3. gdalのインストール
@@ -43,7 +43,7 @@ sudo apt-get -y install python-gdal
 #### 2.2. 実行方法
 
 ``` bash
-python3 kokudoDEM2bin.py <-l lonmin latmin lonmax latmax> [-nd] [-nc] [-ncon] [-nf] [-ms MAXSIZE] [-h] [-min] [-max]
+python3 kokudoDEM2bin.py [-l lonmin latmin lonmax latmax] [-nd] [-nc] [-ncon] [-nf] [-ms MAXSIZE] [-h] [-min] [-max]
 ```
 
 * 必須引数
@@ -65,9 +65,19 @@ python3 kokudoDEM2bin.py <-l lonmin latmin lonmax latmax> [-nd] [-nc] [-ncon] [-
 
 #### 2.3. 実行例
 
+##### 2.3.1. 基本例
+
+`connected_bin`ディレクトリにバイナリデータが、`fig`ディレクトリに画像データが出力される。
+
 ```bash
-python3 kokudoDEM2bin.py -l 36.554892 137.638887 36.589236 137.698095 -ms 100 --vmin 1000
+python kokudoDEM2bin.py -l 36.554892 137.638887 36.589236 137.698095 -ms 100 --vmin 1000
 ```
+
+
+
+##### 2.3.2. 応用例
+
+0.1°×0.1°の
 
 
 

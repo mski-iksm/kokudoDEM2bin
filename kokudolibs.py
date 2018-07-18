@@ -15,6 +15,7 @@ from multiprocessing import Pool, Process, cpu_count
 
 
 def get_tile(lon_min, lon_max, lat_min, lat_max):
+    # input lats/lons should be 0.01 * n
     ll_x = int(lon2x(lon_min))  # small x
     ur_x = int(lon2x(lon_max))  # large x
     ll_y = int(lat2y(lat_min))  # large y
@@ -47,8 +48,9 @@ def y2lat(y):
 
 
 def download_json(ll_x, ll_y, ur_x, ur_y):
+    # download 1 tile outside target area
     xylist = list(itertools.product(
-        range(ll_x, ur_x + 1), range(ur_y, ll_y + 1)))
+        range(ll_x - 1, ur_x + 2), range(ur_y - 1, ll_y + 2)))
     n = cpu_count()
     p = Pool(n * 2)
     p.map(downoad_iter, xylist)
@@ -78,6 +80,13 @@ def downoad_iter(arg):
 
     else:
         print("json file for {} {} arleady exists".format(x, y))
+
+
+def connectjsons():
+    # connect target json files
+    # use python instead of gdal
+
+    #
 
 
 def connectbins(ll_x, ll_y, ur_x, ur_y, maxsize):
@@ -163,8 +172,8 @@ def json2raster(arg):
             lat_min = y2lat(y + 1)
             lat_max = y2lat(y)
 
-            xsize = 30
-            ysize = 30
+            xsize = int((lon_max - lon_min) * 3600 * 6)
+            ysize = int((lat_max - lat_min) * 3600 * 6)
 
             script = "gdal_grid -ot Float32 -of ENVI -zfield alti -a nearest -txe {} {} -tye {} {} -outsize {} {} {} {}".format(
                 lon_min, lon_max, lat_min, lat_max, xsize, ysize, jsonname, binname)

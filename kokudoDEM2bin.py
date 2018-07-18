@@ -38,6 +38,7 @@ parser.add_argument("-max", "--vmax",
                     help='vmax value of DEM illustration. Default is None.',
                     type=float, default=None)
 
+
 args = parser.parse_args()
 
 lon_min = args.llur[1]
@@ -52,11 +53,19 @@ ll_x, ll_y, ur_x, ur_y = kl.get_tile(lon_min, lon_max, lat_min, lat_max)
 if args.nodownload is False:
     kl.download_json(ll_x, ll_y, ur_x, ur_y)
 
-# convert each json file into binary file
+# connect json files
+
+
+# interpolate and convert connected json file into binary
+# reslution is 1/6 arc second
+# tile size is 216x216 px
+
+################################
+# interpolate and convert each json file into binary file
 if args.noconvert is False:
     kl.convertjson(ll_x, ll_y, ur_x, ur_y)
 
-# connect binary files and interpolate
+# connect binary files
 if args.noconnect is False:
     kl.connectbins(ll_x, ll_y, ur_x, ur_y, args.maxsize)
 
