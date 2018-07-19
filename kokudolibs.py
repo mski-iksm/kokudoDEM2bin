@@ -100,10 +100,10 @@ def connect_jsons(ll_x, ll_y, ur_x, ur_y, lat_min, lon_min):
     new_json_file.close()
 
 
-def convert_json(lat_min, lon_min, lat_max, lon_max):
+def convert_json(lat_min, lon_min, lat_max, lon_max, resolution):
     # connected_json -> bin
-    xsize = 2160
-    ysize = 2160
+    xsize = int(resolution * (lon_max - lon_min))
+    ysize = int(resolution * (lat_max - lat_min))
     jsonname = "connected_json/{}_{}.geojson".format(lat_min, lon_min)
     binname = "bin/{}_{}.bin".format(lat_min, lon_min)
     script = "gdal_grid -ot Float32 -of ENVI -l OGRGeoJSON -zfield alti -a nearest -txe {} {} -tye {} {} -outsize {} {} {} {}".format(
@@ -112,12 +112,14 @@ def convert_json(lat_min, lon_min, lat_max, lon_max):
     os.system(script)
 
 
-def make_fig(lat_min, lon_min, showfig, vmin, vmax):
+def make_fig(lat_min, lon_min, lat_max, lon_max, showfig, vmin, vmax, resolution):
     binname = "bin/{}_{}.bin".format(lat_min, lon_min)
     if os.path.exists(binname):
         print("illustraing {}".format(binname))
+        xsize = int(resolution * (lon_max - lon_min))
+        ysize = int(resolution * (lat_max - lat_min))
         bindata = np.fromfile(
-            binname, dtype="float32").reshape([2160, 2160])
+            binname, dtype="float32").reshape([ysize, xsize])
 
         plt.close()
         plt.imshow(bindata, vmin=vmin, vmax=vmax)

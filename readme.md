@@ -42,7 +42,8 @@ sudo apt-get -y install python-gdal
 #### 2.2. 実行方法
 
 ``` bash
-python kokudoDEM2bin.py [-l lonmin latmin lonmax latmax] [-nd] [-nc] [-ncon] [-nf] [-ms MAXSIZE] [-h] [-min] [-max]
+usage: kokudoDEM2bin.py [-h] -l LLUR LLUR LLUR LLUR [-nd] [-ncon] [-nc] [-nf]
+                        [-sf] [-min VMIN] [-max VMAX]
 ```
 
 * 必須引数
@@ -50,10 +51,9 @@ python kokudoDEM2bin.py [-l lonmin latmin lonmax latmax] [-nd] [-nc] [-ncon] [-n
 * オプショナル引数
   * `-nd, --nodownload`：jsonファイルのダウンロードをスキップする場合に使用。`json`フォルダに必要なjsonファイルが既にダウンロード済みの場合のみ使用可能。
   * `-nc, --noconvert`：jsonファイルをバイナリデータに変換する作業をスキップする場合に使用。`bin`フォルダに必要なバイナリデータがある場合のみ使用可能。
-  * `-ncon, --noconnect`：1タイルごとのバイナリデータを大きなサイズに結合する作業をスキップする場合に使用。`connected_bin`に必要な結合済みバイナリデータがある場合のみ使用可能。
+  * `-ncon, --noconnect`：1タイルごとのjsonデータを大きなサイズに結合する作業をスキップする場合に使用。`connected_json`に必要な結合済みバイナリデータがある場合のみ使用可能。
   * `-nf, --nofig`：画像を出力しない場合にのみ使用可能。
   * `-sf, --showfig`：画像を表示させる場合に使用。使用した場合、画像ファイルは保存されない。
-  * `-ms MAXSIZE, --maxsize MAXSIZE`：１つの画像として結合するタイルの数（１辺のタイル数）を`int`で指定する。指定しない場合は`10`（10x10=100タイルを結合する）。なお、元データの１タイルは一辺150m程度。
   * `-min VMIN, --vmin VMIN`：DEMを図化する際の最小値。デフォルトは`None`なのでデータ中の最小値を図の最小値とする。
   * `-max VMAX, --vmax VMAX`：DEMを図化する際の最大値。デフォルトは`None`なのでデータ中の最大値を図の最大値とする。
   * `-h`：ヘルプを表示。
@@ -64,19 +64,11 @@ python kokudoDEM2bin.py [-l lonmin latmin lonmax latmax] [-nd] [-nc] [-ncon] [-n
 
 #### 2.3. 実行例
 
-##### 2.3.1. 基本例
-
-`connected_bin`ディレクトリにバイナリデータが、`fig`ディレクトリに画像データが出力される。
+`bin`ディレクトリにバイナリデータが、`fig`ディレクトリに画像データが出力される。
 
 ```bash
-python kokudoDEM2bin.py -l 36.554892 137.638887 36.589236 137.698095 -ms 100 --vmin 1000
+python kokudoDEM2bin.py -l 36.554892 137.638887 36.589236 137.698095 --vmin 1000
 ```
-
-
-
-##### 2.3.2. 応用例
-
-0.1°×0.1°の
 
 
 
@@ -84,7 +76,7 @@ python kokudoDEM2bin.py -l 36.554892 137.638887 36.589236 137.698095 -ms 100 --v
 
 __[メイン出力]__
 
-* `connected_bin`フォルダ：DEMのバイナリファイル。
+* `bin`フォルダ：DEMのバイナリデータが保存される。
   * float32形式
   * リトルエンディアン
   * C言語オーダーのバイナリ配列（[m,n]はm行n列）
@@ -121,27 +113,23 @@ Codes for converting DEM data (Kiban Chizu Jyouhou Digital Elevation Map) of Jap
 ### Usage
 
 ```bash
-usage: kokudoDEM2bin.py [-h] -l LLUR LLUR LLUR LLUR [-nd] [-nc] [-ncon] [-nf]
-                        [-ms MAXSIZE]
+usage: kokudoDEM2bin.py [-h] -l LLUR LLUR LLUR LLUR [-nd] [-ncon] [-nc] [-nf]
+                        [-sf] [-min VMIN] [-max VMAX]
 
 Download and convert Japanese DEM to binary files.
 
 optional arguments:
   -h, --help            show this help message and exit
   -l LLUR LLUR LLUR LLUR, --llur LLUR LLUR LLUR LLUR
-                        Input the Lower Left corner and Upper Right corner
-                        cordinate. Order must be [LL(lat) LL(lon) UR(lat)
-                        UR(lon)]
+                        Locate the target region by lon/lat coordinate. Input
+                        the Lower Left corner and Upper Right corner
+                        cordinate. Order must be [LL(lon) UR(lon) LL(lat)
+                        UR(lat)]
   -nd, --nodownload     Set for skip downloading.
-  -nc, --noconvert      Set for skip converting each json file to binary.
-  -ncon, --noconnect    Set for skip connecting binary files.
+  -ncon, --noconnect    Set for skip connecting json files.
+  -nc, --noconvert      Set for skip converting connected json file to binary.
   -nf, --nofig          Set for skip illustrating figure.
   -sf, --showfig        Set for show figure instead of saveing as png file.
-  -ms MAXSIZE, --maxsize MAXSIZE
-                        Max size of connected binary data in number of tiles.
-                        The binary data will be separated into multiple files
-                        when selected area exceeds this size. Default is 10
-                        tiles (10x10 tile box is max).
   -min VMIN, --vmin VMIN
                         vmin value of DEM illustration. Default is None.
   -max VMAX, --vmax VMAX
