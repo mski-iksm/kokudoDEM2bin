@@ -122,7 +122,7 @@ def make_fig(lat_min, lon_min, lat_max, lon_max, showfig, vmin, vmax, resolution
             binname, dtype="float32").reshape([ysize, xsize])
 
         plt.close()
-        plt.imshow(bindata, vmin=vmin, vmax=vmax)
+        plt.imshow(np.flipud(bindata), vmin=vmin, vmax=vmax)
         plt.colorbar()
         figname = "fig/{}_{}.png".format(lat_min, lon_min)
 
