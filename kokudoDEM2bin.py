@@ -9,7 +9,7 @@ parser = argparse.ArgumentParser(
 parser.add_argument("-l", "--llur",
                     help='Locate the target region by lon/lat coordinate.\
                      Input the Lower Left corner and Upper Right corner cordinate.\
-                     Order must be [LL(lon) UR(lon) LL(lat) UR(lat)]',
+                     Order must be [LL(lat) LL(lon) UR(lat) UR(lon)]',
                     nargs=4, type=float, required=True)
 parser.add_argument("-nd", "--nodownload",
                     help='Set for skip downloading.',
@@ -42,10 +42,10 @@ parser.add_argument("-max", "--vmax",
 
 args = parser.parse_args()
 
-lon_min = args.llur[0]
-lon_max = args.llur[1]
-lat_min = args.llur[2]
-lat_max = args.llur[3]
+lon_min = args.llur[1]
+lon_max = args.llur[3]
+lat_min = args.llur[0]
+lat_max = args.llur[2]
 
 # get coordinate tile number
 ll_x, ll_y, ur_x, ur_y = kl.get_tile(lon_min, lon_max, lat_min, lat_max)

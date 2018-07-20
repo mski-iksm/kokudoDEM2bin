@@ -31,7 +31,7 @@ pip install numpy matplotlib
 
 3. gdalのインストール
 
-```bash
+```bashw
 sudo add-apt-repository ppa:ubuntugis/ppa
 sudo apt-get update
 sudo apt-get install gdal-bin
@@ -39,7 +39,30 @@ sudo apt-get -y install python-gdal
 ```
 
 
-#### 2.2. 実行方法
+#### 2.2. kokudoDEM2binを実行
+1. git clone
+
+```
+git clone git@github.com:mski-iksm/kokudoDEM2bin.git
+```
+
+2. ディレクトリ移動
+
+```
+cd kokudoDEM2bin
+```
+
+3. 実行例
+
+`(35.519373°N, 139.741287°E)`から`(35.581384°N, 139.854240°E)`までのDEMを生成する（羽田空港付近）。
+`bin`ディレクトリにバイナリデータが、`fig`ディレクトリに画像データが出力される。
+
+```bash
+python kokudoDEM2bin.py -l 35.519373 139.741287 35.581384 139.854240
+```
+
+
+#### 2.3. パラメータの説明
 
 ``` bash
 usage: kokudoDEM2bin.py [-h] -l LLUR LLUR LLUR LLUR [-nd] [-ncon] [-nc] [-nf]
@@ -64,11 +87,6 @@ usage: kokudoDEM2bin.py [-h] -l LLUR LLUR LLUR LLUR [-nd] [-ncon] [-nc] [-nf]
 
 #### 2.3. 実行例
 
-`bin`ディレクトリにバイナリデータが、`fig`ディレクトリに画像データが出力される。
-
-```bash
-python kokudoDEM2bin.py -l 36.554892 137.638887 36.589236 137.698095 --vmin 1000
-```
 
 
 
@@ -123,8 +141,7 @@ optional arguments:
   -l LLUR LLUR LLUR LLUR, --llur LLUR LLUR LLUR LLUR
                         Locate the target region by lon/lat coordinate. Input
                         the Lower Left corner and Upper Right corner
-                        cordinate. Order must be [LL(lon) UR(lon) LL(lat)
-                        UR(lat)]
+                        cordinate. Order must be [LL(lat) LL(lon) UR(lat) UR(lon)]
   -nd, --nodownload     Set for skip downloading.
   -ncon, --noconnect    Set for skip connecting json files.
   -nc, --noconvert      Set for skip converting connected json file to binary.
