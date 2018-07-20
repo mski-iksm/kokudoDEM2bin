@@ -13,6 +13,7 @@ import _tkinter
 import itertools
 from multiprocessing import Pool, Process, cpu_count
 import json
+import shutil
 
 
 def get_tile(lon_min, lon_max, lat_min, lat_max):
@@ -72,6 +73,8 @@ def downoad_iter(arg):
                 break
             except urllib.error.HTTPError as e:
                 print("no {} file found at {}".format(filetype, filename))
+                if filetype == "10b":
+                    shutil.copy2("./json/default_json.geojson", savename)
 
     else:
         print("json file for {} {} arleady exists".format(x, y))

@@ -5,3 +5,4 @@ fig/*
 json/*
 
 !.gitkeep
+!default_json.geojson
