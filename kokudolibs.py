@@ -14,6 +14,7 @@ import itertools
 from multiprocessing import Pool, Process, cpu_count
 import json
 import shutil
+from mpl_toolkits.axes_grid1 import make_axes_locatable
 
 
 def get_tile(lon_min, lon_max, lat_min, lat_max):
@@ -125,8 +126,17 @@ def make_fig(lat_min, lon_min, lat_max, lon_max, showfig, vmin, vmax, resolution
             binname, dtype="float32").reshape([ysize, xsize])
 
         plt.close()
-        plt.imshow(np.flipud(bindata), vmin=vmin, vmax=vmax)
-        plt.colorbar()
+        fig, ax = plt.subplots()
+        image = ax.imshow(np.flipud(bindata), vmin=vmin, vmax=vmax)
+        ax.axis("image")
+
+        divider = make_axes_locatable(ax)
+        ax_cb = divider.new_horizontal(size="3%", pad=0.05)
+        fig.add_axes(ax_cb)
+        plt.colorbar(image, cax=ax_cb)
+
+        #plt.imshow(np.flipud(bindata), vmin=vmin, vmax=vmax)
+        # plt.colorbar()
         figname = "fig/{}_{}.png".format(lat_min, lon_min)
 
         if showfig:
